@@ -1,10 +1,11 @@
+import cartModel from "../models/cartModel.js";
 import foodModel from "../models/foodModel.js"
 import userModel from "../models/userModel.js"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 
 const createtoken = (userid) => {
-    return jwt.sign({ userid }, process.env.JWT_SECRET,{ expiresIn: '1h' });
+    return jwt.sign({ userid }, process.env.JWT_SECRET,{ expiresIn: '10m' });
   };
   
 const foodLists=async(req,res)=>{
@@ -72,4 +73,75 @@ const userRegister=async(req,res)=>{
   }
 }
 
-export {foodLists,userLogin,userRegister}
+
+const addToCart=async(req,res)=>{
+  const {itemId}=req.body;
+  const userId = req.userid;
+  try {
+    const existcart=await cartModel.findOne({userId});
+   console.log(existcart)
+    if(!existcart ){
+      const newItem=await new cartModel({
+     userId:userId,
+     items:[{itemId,quantity:1}]
+      })
+     
+      await newItem.save();
+      return res.json({success:true,message :"added succesfully"})
+    }else{
+     const existitem=existcart.items.find(item=>item.itemId.toString()===itemId.toString())
+     if(existitem){
+      existitem.quantity+=1
+     }else{
+      existcart.items.push({ itemId, quantity: 1 });
+     }
+     await existcart.save()
+     return res.json({success:true,message :"added succesfully"})
+    }
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+const removeFromCart=async(req,res)=>{
+  const {itemId}=req.body;
+  const userId = req.userid;
+  try {
+    const existcart=await cartModel.findOne({userId});
+    const existitem=existcart.items.find(item=>item.itemId.toString()===itemId.toString())
+     if(existitem.quantity===1){
+      existcart.items = existcart.items.filter(item => item.itemId.toString() !== itemId.toString());
+      await existcart.save()
+      return res.json({success:true,message :"removed succesfully"})
+     }else if(existitem.quantity>1){
+      existitem.quantity-=1;
+      await existcart.save()
+      return res.json({success:true,message :"removed succesfully"})
+     }else{
+      existcart.items.push({ itemId, quantity: 1 });
+      await existitem.save()
+     }
+  
+     
+      
+  } catch (error) {
+    
+  }
+}
+
+const usercart=async(req,res)=>{
+  console.log("reached here")
+  const userId=req.userid;
+  try {
+    const usercart=await cartModel.findOne({userId});
+    if(!usercart){
+      return res.status(402).json({success:false,message:"no cart available"})
+    }
+    return res.json({success:true,message:"cart available",usercart})
+  } catch (error) {
+    
+  }
+
+}
+
+export {foodLists,userLogin,userRegister,addToCart,removeFromCart,usercart}
