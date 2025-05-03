@@ -3,6 +3,7 @@ import cors from "cors"
 import { connectDB } from "./config/db.js";
 import "dotenv/config"
 import userRouter from "./routes/userRouter.js";
+import adminRouter from "./routes/adminRouter.js";
 
 
 const app=express()
@@ -27,6 +28,7 @@ connectDB()
 //api end point
 
 app.use('/api/auth',userRouter)
+app.use('/api/admin',adminRouter)
 
 
 
