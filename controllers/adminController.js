@@ -63,6 +63,8 @@ const orderDatas=async(req,res)=>{
 const foodDatas=async(req,res)=>{
     try {
         const allFoods=await foodModel.find({})
+         
+       
         if(!allFoods){
             return res.json({success:false,message:"no orders found"})
         }
@@ -85,5 +87,29 @@ const updateOrder=async(req,res)=>{
         console.log(error)   }
 }
 
+const updateFood=async(req,res)=>{
+    try {
+        const {fooddetails,foodid}=req.body;
+        const updatedfood=await foodModel.findByIdAndUpdate(foodid,fooddetails,{new:true})
+        return res.json({success:true,updatedfood,message:"updated succesfully"})
+    } catch (error) {
+        
+    }
+}
 
-export {userDatas,orderDatas,foodDatas,adminLogin,updateOrder}
+
+const updatefoodstatus=async(req,res)=>{
+    try {
+        const {foodid,foodstatus}=req.body;
+        console.log(foodstatus)
+        const updatedstatus=await foodModel.findByIdAndUpdate(foodid,{
+            isAvailable:!foodstatus
+        },{new:true})
+        return res.json({updatedstatus})
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+
+export {userDatas,orderDatas,foodDatas,adminLogin,updateOrder,updateFood,updatefoodstatus}
