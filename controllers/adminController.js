@@ -6,9 +6,12 @@ import adminModel from "../models/adminModel.js";
 import bcrypt from 'bcrypt'
 import jwt from "jsonwebtoken"
 
+//token creation
 const createtoken = (adminid) => {
     return jwt.sign({ adminid }, process.env.JWT_SECRET,{ expiresIn: '24h' });
   };
+
+//get all users
 const userDatas=async(req,res)=>{
     try {
         const allUsers=await userModel.find({})
@@ -22,18 +25,18 @@ const userDatas=async(req,res)=>{
     }
 }
 
-
+//login
 const adminLogin=async(req,res)=>{
     try {
         const {username,password}=req.body;
         console.log(username,password)
         if(!username || !password){
-            return res.json({success:false,message:"credentials needed"})
+            return res.status(403).json({success:false,message:"credentials needed"})
         }
       
         const existadmin=await adminModel.findOne({username});
         if(!existadmin){
-            return res.json({success:false,message:"no data found"})
+            return res.status(403).json({success:false,message:"no data found"})
         }
              const passwordMatch=await bcrypt.compare(password,existadmin.password);
        if(!passwordMatch){
@@ -47,6 +50,8 @@ const adminLogin=async(req,res)=>{
     }
 }
 
+
+//all orders
 const orderDatas=async(req,res)=>{
     try {
         const allOrders=await orderModel.find({}).populate('items.itemId')
@@ -60,6 +65,7 @@ const orderDatas=async(req,res)=>{
     }
 }
 
+//all foods list
 const foodDatas=async(req,res)=>{
     try {
         const allFoods=await foodModel.find({})
@@ -75,6 +81,7 @@ const foodDatas=async(req,res)=>{
     }
 }
 
+//update user orders
 const updateOrder=async(req,res)=>{
     try {
         const {orderid,status}=req.body;
@@ -87,6 +94,8 @@ const updateOrder=async(req,res)=>{
         console.log(error)   }
 }
 
+
+//update food data
 const updateFood=async(req,res)=>{
     try {
         const {fooddetails,foodid}=req.body;
@@ -97,7 +106,7 @@ const updateFood=async(req,res)=>{
     }
 }
 
-
+//update food availablity
 const updatefoodstatus=async(req,res)=>{
     try {
         const {foodid,foodstatus}=req.body;

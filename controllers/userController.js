@@ -7,16 +7,22 @@ import jwt from "jsonwebtoken"
 import crypto from 'crypto'
 import orderModel from "../models/orderModel.js";
 
+
+//function to create token
 const createtoken = (userid) => {
     return jwt.sign({ userid }, process.env.JWT_SECRET,{ expiresIn: '24h' });
   };
+
+  //razorpay
   const razorpay=new Razorpay({
     key_id:process.env.RAZORPAY_TEST_KEY,
     key_secret:process.env.RAZORPAY_TESTKEY_SECRET
   })
+
+//all available food
 const foodLists=async(req,res)=>{
     try {
-        const foodlists=await foodModel.find({})
+        const foodlists=await foodModel.find({isAvailable:true})
         
         const todayspecial = await foodModel.find({
           name: { $in: ["Chicken Salad", "Veg Rolls", "Grilled Sandwich","Tomato Pasta","Cooked Noodles","Rice Zucchini"] }
@@ -27,6 +33,7 @@ const foodLists=async(req,res)=>{
     }
 }
 
+//login user
 const userLogin=async(req,res)=>{
   const  {email,password}=req.body;
   console.log(email,password)
@@ -50,7 +57,7 @@ const userLogin=async(req,res)=>{
 
 }
 
-
+//register user
 const userRegister=async(req,res)=>{
   const {name,email,password}=req.body;
    console.log(name,email,password)
@@ -84,6 +91,7 @@ const userRegister=async(req,res)=>{
 }
 
 
+//add to cart
 const addToCart=async(req,res)=>{
   const {itemId}=req.body;
   const userId = req.userid;
@@ -114,6 +122,8 @@ const addToCart=async(req,res)=>{
   }
 }
 
+
+//remove from cart
 const removeFromCart=async(req,res)=>{
   const {itemId}=req.body;
   const userId = req.userid;
@@ -132,14 +142,12 @@ const removeFromCart=async(req,res)=>{
       existcart.items.push({ itemId, quantity: 1 });
       await existitem.save()
      }
-  
-     
-      
   } catch (error) {
     
   }
 }
 
+//cart items
 const usercart=async(req,res)=>{
   console.log("reached here")
   const userId=req.userid;
@@ -155,6 +163,8 @@ const usercart=async(req,res)=>{
 
 }
 
+
+//creating user order
 const createOrder=async(req,res)=>{
   
   try {
@@ -178,7 +188,7 @@ const createOrder=async(req,res)=>{
   }
 }
 
-
+//verify razorpay payment
 const verifyPayment=async(req,res)=>{
   try {
     const {paymentData,orderdetails,Data}=req.body;
